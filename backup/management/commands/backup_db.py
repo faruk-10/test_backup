@@ -23,7 +23,7 @@ class Command(BaseCommand):
         backup_dir = Path.cwd()/ "db_backup"
         backup_dir.mkdir(parents=True, exist_ok=True)
 
-        filename = f"{db_name}_1.sql"
+        filename = "backup_1.sql"
         filepath = backup_dir / filename
 
         try:
