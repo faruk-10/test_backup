@@ -3,6 +3,7 @@ import subprocess
 from django.core.management.base import BaseCommand
 from datetime import datetime
 from pathlib import Path
+from django.core.management import call_command
 
 class Command(BaseCommand):
     help = "Backup full PostgreSQL database and data using pg_dump"
@@ -38,6 +39,7 @@ class Command(BaseCommand):
             ], check=True)
 
             self.stdout.write(self.style.SUCCESS(f"✅ Database backup created: {filepath}"))
+            call_command('push_backup_to_git')
 
         except subprocess.CalledProcessError as e:
             self.stderr.write(self.style.ERROR(f"❌ Backup failed: {e}"))

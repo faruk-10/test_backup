@@ -20,23 +20,24 @@ class Command(BaseCommand):
             return
 
         latest_backup = backups[0]
-        git_repo_dir = Path.cwd() / "db_backup_repo"  # Change this to your Git repo directory
+        git_repo_dir = Path.cwd()  # Use the current directory where the git repo is initialized
 
-        if not git_repo_dir.exists():
-            self.stderr.write(self.style.ERROR("❌ Git repository directory does not exist."))
+        # Check if the Git repository exists (i.e., if it's a valid Git directory)
+        if not (git_repo_dir / ".git").exists():
+            self.stderr.write(self.style.ERROR("❌ Not a Git repository directory."))
             return
 
-        # Copy the latest backup to the Git repository
+        # Copy the latest backup directly into the Git repository
         backup_filename = latest_backup.name
         destination = git_repo_dir / backup_filename
         subprocess.run(["cp", str(latest_backup), str(destination)], check=True)
 
         # Change directory to Git repository and perform Git operations
         try:
-            subprocess.run(["git", "add", backup_filename], cwd=git_repo_dir, check=True)
+            subprocess.run(["git", "add", "."], cwd=git_repo_dir, check=True)
             commit_message = f"Backup: {backup_filename} - {now().strftime('%Y-%m-%d %H:%M:%S')}"
             subprocess.run(["git", "commit", "-m", commit_message], cwd=git_repo_dir, check=True)
-            subprocess.run(["git", "push"], cwd=git_repo_dir, check=True)
+            subprocess.run(["git", "push", "origin", "main"], cwd=git_repo_dir, check=True)
 
             self.stdout.write(self.style.SUCCESS(f"✅ Backup {backup_filename} pushed to Git repository."))
 
