@@ -3,11 +3,13 @@ import subprocess
 from pathlib import Path
 from django.core.management.base import BaseCommand
 from django.utils.timezone import now
+from django.core.management import call_command
 
 class Command(BaseCommand):
     help = "Push the latest database backup to a Git repository"
 
     def handle(self, *args, **kwargs):
+        call_command('delete_old_backups')
         backup_dir = Path.cwd() / "db_backup"
         if not backup_dir.exists():
             self.stderr.write(self.style.ERROR("❌ Backup directory does not exist."))
