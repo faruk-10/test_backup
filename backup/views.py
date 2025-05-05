@@ -8,7 +8,7 @@ def trigger_backup(request):
 
 def restore_backup(request):
     try:
-        call_command('restorelastbackup')
+        call_command('restore_db')
         return JsonResponse({'status': 'Backup triggered'})
     except Exception as e:
         return JsonResponse({'status': f'Backup triggered{e}'})
