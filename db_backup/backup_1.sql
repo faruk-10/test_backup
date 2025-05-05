@@ -344,6 +344,7 @@ COPY public.auth_permission (id, name, content_type_id, codename) FROM stdin;
 --
 
 COPY public.auth_user (id, password, last_login, is_superuser, username, first_name, last_name, email, is_staff, is_active, date_joined) FROM stdin;
+1	pbkdf2_sha256$1000000$7UnWAjDbc6zzADQCU5RCYI$aVDwSAp+DI5oKFRtPABF/XW8R1UFbJnKa0E+Qap5YXU=	\N	t	new			new@new.com	t	t	2025-05-05 18:19:30.872259+05:30
 \.
 
 
@@ -451,7 +452,7 @@ SELECT pg_catalog.setval('public.auth_user_groups_id_seq', 1, false);
 -- Name: auth_user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: admin
 --
 
-SELECT pg_catalog.setval('public.auth_user_id_seq', 1, false);
+SELECT pg_catalog.setval('public.auth_user_id_seq', 1, true);
 
 
 --
