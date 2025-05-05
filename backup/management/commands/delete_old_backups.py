@@ -16,7 +16,7 @@ class Command(BaseCommand):
 
         # Check if there are more than 5 backup files
         if len(backups) > 5:
-            files_to_delete = backups[:-5]  # Select the oldest files to delete
+            files_to_delete = backups[:-3]  # Select the oldest files to delete
 
             # Delete the old backup files
             for file in files_to_delete:
