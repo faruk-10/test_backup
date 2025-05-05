@@ -3,6 +3,7 @@ import subprocess
 from pathlib import Path
 from django.core.management.base import BaseCommand
 from django.conf import settings
+from django.core.management import call_command
 
 
 class Command(BaseCommand):
@@ -17,6 +18,8 @@ class Command(BaseCommand):
         db_port = db["PORT"] or "5432"
 
         os.environ["PGPASSWORD"] = db_password
+
+        call_command('fetch_new_data')
 
         backup_file = Path.cwd() / "db_backup" / "backup_1.dump"
         if not backup_file.exists():
