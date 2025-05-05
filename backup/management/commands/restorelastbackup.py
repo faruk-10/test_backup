@@ -28,7 +28,11 @@ class Command(BaseCommand):
 
         # Drop the database
         subprocess.run([
-            "psql", "-U", db_user, "-h", db_host, "-p", db_port,
+            "psql",
+            "-U", db_user,
+            "-h", db_host,
+            "-p", db_port,
+            "-d", "postgres",  # 👈 connect to postgres instead of user name
             "-c", f"DROP DATABASE IF EXISTS {db_name};"
         ], check=True)
 
@@ -36,7 +40,11 @@ class Command(BaseCommand):
 
         # Recreate the database
         subprocess.run([
-            "psql", "-U", db_user, "-h", db_host, "-p", db_port,
+            "psql",
+            "-U", db_user,
+            "-h", db_host,
+            "-p", db_port,
+            "-d", "postgres",  # 👈 connect to postgres instead of user name
             "-c", f"CREATE DATABASE {db_name};"
         ], check=True)
 
