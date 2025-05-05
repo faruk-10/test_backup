@@ -21,19 +21,7 @@ class Command(BaseCommand):
 
         backup_dir = Path.cwd() / "db_backup"
         backup_1 = backup_dir / "backup_1.sql"
-        backup_2 = backup_dir / "backup_2.sql"
-
-        # Rotate backups before pulling
-        if backup_2.exists():
-            backup_2.unlink()
-            self.stdout.write(self.style.WARNING("🗑️ Deleted old backup_2.sql"))
-
-        if backup_1.exists():
-            backup_1.rename(backup_2)
-            self.stdout.write(self.style.SUCCESS("🔁 Renamed backup_1.sql to backup_2.sql"))
-        else:
-            self.stdout.write(self.style.WARNING("⚠️ backup_1.sql not found, skipping rename"))
-
+        
         # Git pull to fetch latest backup
         try:
             subprocess.run(["git", "pull", "origin", "main"], check=True)
