@@ -29,8 +29,8 @@ class Command(BaseCommand):
 
         # Copy the latest backup directly into the Git repository
         backup_filename = latest_backup.name
-        destination = git_repo_dir / backup_filename
-        subprocess.run(["cp", str(latest_backup), str(destination)], check=True)
+        # destination = git_repo_dir / backup_filename
+        # subprocess.run(["cp", str(latest_backup), str(destination)], check=True)
 
         # Change directory to Git repository and perform Git operations
         try:
