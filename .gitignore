@@ -1,2 +1,16 @@
-.env
-venv
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+.env/
+
+# VSCode settings (optional)
+.vscode/
+
+# Django migrations (optional if you regenerate them often)
+**/migrations/*.pyc
+**/migrations/__pycache__/
+
