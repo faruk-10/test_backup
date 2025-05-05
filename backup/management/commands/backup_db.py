@@ -1,7 +1,6 @@
 import os
 import subprocess
 from django.core.management.base import BaseCommand
-from datetime import datetime
 from pathlib import Path
 from django.core.management import call_command
 
@@ -24,7 +23,7 @@ class Command(BaseCommand):
         backup_dir = Path.cwd()/ "db_backup"
         backup_dir.mkdir(parents=True, exist_ok=True)
 
-        filename = f"{db_name}_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.sql"
+        filename = f"{db_name}_1.sql"
         filepath = backup_dir / filename
 
         try:
