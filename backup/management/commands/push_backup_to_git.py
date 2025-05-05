@@ -16,7 +16,7 @@ class Command(BaseCommand):
             return
 
         # Get the latest backup file
-        backups = sorted(backup_dir.glob("*.sql"), key=os.path.getmtime, reverse=True)
+        backups = sorted(backup_dir.glob("*.dump"), key=os.path.getmtime, reverse=True)
         if not backups:
             self.stderr.write(self.style.ERROR("❌ No backup file found."))
             return
@@ -31,8 +31,6 @@ class Command(BaseCommand):
 
         # Copy the latest backup directly into the Git repository
         backup_filename = latest_backup.name
-        # destination = git_repo_dir / backup_filename
-        # subprocess.run(["cp", str(latest_backup), str(destination)], check=True)
 
         # Change directory to Git repository and perform Git operations
         try:

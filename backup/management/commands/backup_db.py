@@ -1,46 +1,41 @@
 import os
 import subprocess
-from django.core.management.base import BaseCommand
 from pathlib import Path
-from django.core.management import call_command
+from django.core.management.base import BaseCommand
 from django.conf import settings
+from django.core.management import call_command
+
 
 class Command(BaseCommand):
-    help = "Backup full PostgreSQL database and data using pg_dump"
+    help = "Create a PostgreSQL database backup and keep the last two versions."
 
-    def handle(self, *args, **kwargs):
-        db_settings = settings.DATABASES['default']
-
-        db_name = db_settings['NAME']
-        db_user = db_settings['USER']
-        db_password = db_settings['PASSWORD']
-        db_host = db_settings['HOST'] or 'localhost'
-        db_port = str(db_settings['PORT'] or '5432')
+    def handle(self, *args, **options):
+        db = settings.DATABASES["default"]
+        db_name = db["NAME"]
+        db_user = db["USER"]
+        db_password = db["PASSWORD"]
+        db_host = db["HOST"] or "localhost"
+        db_port = db["PORT"] or "5432"
 
         if not db_password:
-            self.stderr.write(self.style.ERROR("❌ DB_PASSWORD is not set."))
+            self.stderr.write(self.style.ERROR("❌ DB_PASSWORD is not set in settings."))
             return
 
         os.environ["PGPASSWORD"] = db_password
 
-        backup_dir = Path.cwd()/ "db_backup"
+        backup_dir = Path.cwd() / "db_backup"
         backup_dir.mkdir(parents=True, exist_ok=True)
 
-        backup_1 = backup_dir / "backup_1.sql"
-        backup_2 = backup_dir / "backup_2.sql"
+        backup_1 = backup_dir / "backup_1.dump"
+        backup_2 = backup_dir / "backup_2.dump"
 
-        # Delete backup_2 if it exists
         if backup_2.exists():
             backup_2.unlink()
-            self.stdout.write(self.style.WARNING("🗑️ Deleted old backup_2.sql"))
+            self.stdout.write(self.style.WARNING("🗑️ Deleted old backup_2.dump"))
 
-        # Rename backup_1 to backup_2 if it exists
         if backup_1.exists():
             backup_1.rename(backup_2)
-            self.stdout.write(self.style.SUCCESS("🔁 Renamed backup_1.sql to backup_2.sql"))
-        else:
-            self.stdout.write(self.style.WARNING("⚠️ backup_1.sql not found, skipping rename"))
-
+            self.stdout.write(self.style.SUCCESS("🔁 Renamed backup_1.dump to backup_2.dump"))
 
         try:
             subprocess.run([
@@ -50,11 +45,12 @@ class Command(BaseCommand):
                 "-p", db_port,
                 "-d", db_name,
                 "-f", str(backup_1),
-                "-F", "plain"  # plain SQL format
+                "-F", "c"  # custom format
             ], check=True)
 
-            self.stdout.write(self.style.SUCCESS(f"✅ Database backup created: {backup_1}"))
+            self.stdout.write(self.style.SUCCESS(f"✅ Backup created: {backup_1}"))
             call_command('push_backup_to_git')
+            
 
         except subprocess.CalledProcessError as e:
             self.stderr.write(self.style.ERROR(f"❌ Backup failed: {e}"))
