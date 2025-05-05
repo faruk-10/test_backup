@@ -3,16 +3,19 @@ import subprocess
 from django.core.management.base import BaseCommand
 from pathlib import Path
 from django.core.management import call_command
+from django.conf import settings
 
 class Command(BaseCommand):
     help = "Backup full PostgreSQL database and data using pg_dump"
 
     def handle(self, *args, **kwargs):
-        db_name = os.environ.get("DB_NAME", "autoupdate")
-        db_user = os.environ.get("DB_USER", "admin")
-        db_password = os.environ.get("DB_PASSWORD", "")
-        db_host = os.environ.get("DB_HOST", "localhost")
-        db_port = os.environ.get("DB_PORT", "5432")
+        db_settings = settings.DATABASES['default']
+
+        db_name = db_settings['NAME']
+        db_user = db_settings['USER']
+        db_password = db_settings['PASSWORD']
+        db_host = db_settings['HOST'] or 'localhost'
+        db_port = str(db_settings['PORT'] or '5432')
 
         if not db_password:
             self.stderr.write(self.style.ERROR("❌ DB_PASSWORD is not set."))
