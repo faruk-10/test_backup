@@ -23,8 +23,21 @@ class Command(BaseCommand):
         backup_dir = Path.cwd()/ "db_backup"
         backup_dir.mkdir(parents=True, exist_ok=True)
 
-        filename = "backup_1.sql"
-        filepath = backup_dir / filename
+        backup_1 = backup_dir / "backup_1.sql"
+        backup_2 = backup_dir / "backup_2.sql"
+
+        # Delete backup_2 if it exists
+        if backup_2.exists():
+            backup_2.unlink()
+            self.stdout.write(self.style.WARNING("🗑️ Deleted old backup_2.sql"))
+
+        # Rename backup_1 to backup_2 if it exists
+        if backup_1.exists():
+            backup_1.rename(backup_2)
+            self.stdout.write(self.style.SUCCESS("🔁 Renamed backup_1.sql to backup_2.sql"))
+        else:
+            self.stdout.write(self.style.WARNING("⚠️ backup_1.sql not found, skipping rename"))
+
 
         try:
             subprocess.run([
@@ -33,11 +46,11 @@ class Command(BaseCommand):
                 "-h", db_host,
                 "-p", db_port,
                 "-d", db_name,
-                "-f", str(filepath),
+                "-f", str(backup_1),
                 "-F", "plain"  # plain SQL format
             ], check=True)
 
-            self.stdout.write(self.style.SUCCESS(f"✅ Database backup created: {filepath}"))
+            self.stdout.write(self.style.SUCCESS(f"✅ Database backup created: {backup_1}"))
             call_command('push_backup_to_git')
 
         except subprocess.CalledProcessError as e:
