@@ -4,7 +4,7 @@ from pathlib import Path
 from django.core.management.base import BaseCommand
 
 class Command(BaseCommand):
-    help = "Pull latest backup and restore the latest backup SQL file to the PostgreSQL database"
+    help = "Pulls latest backup from Git, rotates backup files, and restores database from backup_1.sql"
 
     def handle(self, *args, **kwargs):
         db_name = os.environ.get("DB_NAME", "autoupdate")
@@ -23,35 +23,33 @@ class Command(BaseCommand):
         backup_1 = backup_dir / "backup_1.sql"
         backup_2 = backup_dir / "backup_2.sql"
 
-        # Delete backup_2 if it exists
+        # Rotate backups before pulling
         if backup_2.exists():
             backup_2.unlink()
             self.stdout.write(self.style.WARNING("🗑️ Deleted old backup_2.sql"))
 
-        # Rename backup_1 to backup_2 if it exists
         if backup_1.exists():
             backup_1.rename(backup_2)
             self.stdout.write(self.style.SUCCESS("🔁 Renamed backup_1.sql to backup_2.sql"))
         else:
             self.stdout.write(self.style.WARNING("⚠️ backup_1.sql not found, skipping rename"))
 
-
-        # Step 1: Git pull to get the latest backup files
+        # Git pull to fetch latest backup
         try:
-            subprocess.run(["git", "pull", "origin", "main"])
-            self.stdout.write(self.style.SUCCESS("✅ Pulled latest backup files from Git repository."))
+            subprocess.run(["git", "pull", "origin", "main"], check=True)
+            self.stdout.write(self.style.SUCCESS("✅ Pulled latest backup files from Git."))
         except subprocess.CalledProcessError as e:
             self.stderr.write(self.style.ERROR(f"❌ Git pull failed: {e}"))
             return
 
-        # Step 2: Get latest backup file
-        if not backup_1:
-            self.stderr.write(self.style.ERROR("❌ No backup file found."))
+        # Check again if backup_1 exists after pull
+        if not backup_1.exists():
+            self.stderr.write(self.style.ERROR("❌ backup_1.sql not found after pull. Cannot restore."))
             return
-        
-        self.stdout.write(f"⚠️  Restoring from: {backup_1}")
-        
-        # Step 3: Restore the backup using psql
+
+        self.stdout.write(self.style.WARNING(f"⚠️ Restoring from: {backup_1}"))
+
+        # Restore using psql
         try:
             subprocess.run([
                 "psql",
@@ -66,5 +64,3 @@ class Command(BaseCommand):
 
         except subprocess.CalledProcessError as e:
             self.stderr.write(self.style.ERROR(f"❌ Restore failed: {e}"))
-
-
